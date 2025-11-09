@@ -48,6 +48,15 @@ Enterprise Log Viewer is a production-ready desktop application built with Java 
 - Exception fingerprinting
 - Timeline-based variable tracking
 
+✅ **AWS PCL Authentication** ⭐ NEW!
+- Integrated AWS Partner Central Login with MFA
+- Hardcoded password for simplified authentication
+- 6-digit mobile token validation
+- Automatic AWS credentials configuration
+- kubectl context setup for EKS clusters
+- One-click log download from Kubernetes pods
+- Auto-indexing of downloaded logs
+
 ✅ **Scheduled Log Fetching**
 - Automatic EKS pod log collection
 - Configurable cron-like schedules
@@ -125,6 +134,22 @@ java -Xmx4g -jar log-viewer-app/target/log-viewer.jar
 3. **Search**: Enter text in search box and click Search
 4. **Filter**: Select log level from dropdown
 5. **Dual Pane**: Switch to "Dual Pane Compare" tab for side-by-side viewing
+
+### 4. AWS PCL Login and EKS Log Download ⭐ NEW!
+
+1. **Authenticate**: `Tools → AWS PCL Login...`
+2. **Enter Username**: Your AWS PCL username
+3. **Enter Password**: Hardcoded password (`YourSecurePassword123!`)
+4. **Enter MFA Token**: 6-digit code from your mobile authenticator
+5. **Download Logs**:
+   - Enter EKS cluster name
+   - Specify namespace (default: `default`)
+   - Enter pod pattern (regex, default: `.*` for all)
+   - Click "Download Logs"
+6. **Auto-Index**: Click "Yes" when prompted to index downloaded logs
+7. **Search**: Logs are now searchable in the main interface
+
+📖 **Detailed Guide**: See [AWS_PCL_LOGIN_GUIDE.md](AWS_PCL_LOGIN_GUIDE.md) for complete documentation
 
 ## Usage Examples
 

@@ -5,7 +5,9 @@ import com.enterprise.logviewer.core.service.LogParserService;
 import com.enterprise.logviewer.core.service.SearchService;
 import com.enterprise.logviewer.parsers.CompositeLogParserService;
 import com.enterprise.logviewer.indexing.service.LuceneSearchService;
+import com.enterprise.logviewer.aws.auth.AwsPclAuthService;
 import com.enterprise.logviewer.ui.table.VirtualLogTableModel;
+import com.enterprise.logviewer.ui.dialogs.AwsPclLoginDialog;
 import com.formdev.flatlaf.FlatDarkLaf;
 import net.miginfocom.swing.MigLayout;
 import org.slf4j.Logger;
@@ -30,6 +32,7 @@ public class MainWindow extends JFrame {
     // Services
     private final LogParserService parserService;
     private SearchService searchService;
+    private AwsPclAuthService awsAuthService;
 
     // UI Components
     private final JTabbedPane tabbedPane;
@@ -61,6 +64,9 @@ public class MainWindow extends JFrame {
                 "Failed to initialize search engine: " + e.getMessage(),
                 "Error", JOptionPane.ERROR_MESSAGE);
         }
+
+        // Initialize AWS PCL auth service
+        this.awsAuthService = new AwsPclAuthService();
 
         // Initialize UI components
         this.tabbedPane = new JTabbedPane();
@@ -136,14 +142,18 @@ public class MainWindow extends JFrame {
 
         // Tools menu
         JMenu toolsMenu = new JMenu("Tools");
+        JMenuItem awsPclLoginItem = new JMenuItem("AWS PCL Login...");
         JMenuItem eksItem = new JMenuItem("Fetch from EKS...");
         JMenuItem sshItem = new JMenuItem("Fetch from SSH...");
         JMenuItem clearIndexItem = new JMenuItem("Clear Index");
 
+        awsPclLoginItem.addActionListener(e -> showAwsPclLoginDialog());
         eksItem.addActionListener(e -> showEKSDialog());
         sshItem.addActionListener(e -> showSSHDialog());
         clearIndexItem.addActionListener(e -> clearIndex());
 
+        toolsMenu.add(awsPclLoginItem);
+        toolsMenu.addSeparator();
         toolsMenu.add(eksItem);
         toolsMenu.add(sshItem);
         toolsMenu.addSeparator();
@@ -366,9 +376,79 @@ public class MainWindow extends JFrame {
         }
     }
 
+    private void showAwsPclLoginDialog() {
+        logger.info("Opening AWS PCL Login dialog");
+
+        AwsPclLoginDialog dialog = new AwsPclLoginDialog(this, awsAuthService);
+
+        // Listen for log downloads
+        dialog.addPropertyChangeListener("logs-downloaded", evt -> {
+            Path downloadPath = (Path) evt.getNewValue();
+            logger.info("Logs downloaded to: {}", downloadPath);
+
+            // Auto-index downloaded logs
+            if (searchService != null && downloadPath != null) {
+                try {
+                    java.io.File[] logFiles = downloadPath.toFile().listFiles((dir, name) -> name.endsWith(".log"));
+
+                    if (logFiles != null && logFiles.length > 0) {
+                        setStatus("Indexing downloaded logs...");
+                        showProgress(true);
+
+                        for (java.io.File logFile : logFiles) {
+                            searchService.indexFile(logFile.toPath(), logFile.getName())
+                                .thenRun(() -> SwingUtilities.invokeLater(() -> {
+                                    setStatus("Indexed: " + logFile.getName());
+                                }));
+                        }
+
+                        // Final status update
+                        CompletableFuture.allOf(
+                            java.util.Arrays.stream(logFiles)
+                                .map(f -> searchService.indexFile(f.toPath(), f.getName()))
+                                .toArray(CompletableFuture[]::new)
+                        ).thenRun(() -> SwingUtilities.invokeLater(() -> {
+                            showProgress(false);
+                            setStatus("Indexed " + logFiles.length + " log files from EKS");
+                            JOptionPane.showMessageDialog(this,
+                                "Successfully indexed " + logFiles.length + " log files.\n" +
+                                "You can now search the logs.",
+                                "Indexing Complete",
+                                JOptionPane.INFORMATION_MESSAGE);
+                        }));
+                    }
+                } catch (Exception e) {
+                    logger.error("Failed to index downloaded logs", e);
+                    SwingUtilities.invokeLater(() -> {
+                        showProgress(false);
+                        JOptionPane.showMessageDialog(this,
+                            "Failed to index logs: " + e.getMessage(),
+                            "Error",
+                            JOptionPane.ERROR_MESSAGE);
+                    });
+                }
+            }
+        });
+
+        dialog.setVisible(true);
+
+        if (dialog.isAuthenticated()) {
+            setStatus("✓ Authenticated with AWS PCL");
+            logger.info("User successfully authenticated with AWS PCL");
+        }
+    }
+
     private void showEKSDialog() {
+        if (!awsAuthService.isAuthenticated()) {
+            JOptionPane.showMessageDialog(this,
+                "Please login with AWS PCL first.\nTools → AWS PCL Login",
+                "Authentication Required", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+
         JOptionPane.showMessageDialog(this,
-            "EKS log fetching - Coming soon!\nUse the EKSLogFetcher class programmatically.",
+            "EKS log fetching is now available through AWS PCL Login!\n" +
+            "Use Tools → AWS PCL Login to authenticate and download logs.",
             "EKS Integration", JOptionPane.INFORMATION_MESSAGE);
     }
 
