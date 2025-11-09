@@ -1,0 +1,24 @@
+2024-01-15 10:30:45.123  INFO 12345 --- [           main] com.example.Application                  : Starting Application v1.0.0 on appserver01 with PID 12345
+2024-01-15 10:30:45.456  INFO 12345 --- [           main] com.example.Application                  : The following profiles are active: production
+2024-01-15 10:30:46.789  INFO 12345 --- [           main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat initialized with port(s): 8080 (http)
+2024-01-15 10:30:47.012  INFO 12345 --- [           main] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
+2024-01-15 10:30:47.345  INFO 12345 --- [           main] o.apache.catalina.core.StandardEngine    : Starting Servlet engine: [Apache Tomcat/9.0.70]
+2024-01-15 10:30:48.678  INFO 12345 --- [           main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat started on port(s): 8080 (http) with context path ''
+2024-01-15 10:30:49.901  INFO 12345 --- [           main] com.example.Application                  : Started Application in 4.778 seconds (JVM running for 5.234)
+2024-01-15 10:31:00.234 DEBUG 12345 --- [nio-8080-exec-1] o.s.web.servlet.DispatcherServlet        : GET "/api/users/12345", parameters={}
+2024-01-15 10:31:00.567  INFO 12345 --- [nio-8080-exec-1] com.example.controller.UserController    : Fetching user with id: 12345
+2024-01-15 10:31:00.890 DEBUG 12345 --- [nio-8080-exec-1] com.example.repository.UserRepository    : Executing query: SELECT * FROM users WHERE id = 12345
+2024-01-15 10:31:01.123  INFO 12345 --- [nio-8080-exec-1] com.example.controller.UserController    : User found: john.doe
+2024-01-15 10:31:01.456 DEBUG 12345 --- [nio-8080-exec-1] o.s.web.servlet.DispatcherServlet        : Completed 200 OK
+2024-01-15 10:31:15.789  WARN 12345 --- [nio-8080-exec-2] com.example.service.PaymentService       : Payment processing slow: 3500ms for order ORD-2024-001
+2024-01-15 10:31:30.012 ERROR 12345 --- [pool-1-thread-3] com.example.service.DatabaseService      : Database connection failed
+
+java.sql.SQLException: Connection timeout after 30s
+	at com.zaxxer.hikari.pool.HikariPool.getConnection(HikariPool.java:123) ~[HikariCP-4.0.3.jar:na]
+	at com.example.service.DatabaseService.getConnection(DatabaseService.java:45) ~[classes/:na]
+	at com.example.repository.UserRepository.findById(UserRepository.java:23) ~[classes/:na]
+	at com.example.service.UserService.getUserById(UserService.java:67) ~[classes/:na]
+	at com.example.controller.UserController.getUser(UserController.java:34) ~[classes/:na]
+
+2024-01-15 10:32:00.345  INFO 12345 --- [   scheduling-1] com.example.scheduled.CacheCleanup       : Starting scheduled cache cleanup
+2024-01-15 10:32:05.678  INFO 12345 --- [   scheduling-1] com.example.scheduled.CacheCleanup       : Cache cleanup completed: 150 entries evicted

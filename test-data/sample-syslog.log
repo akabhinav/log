@@ -1,0 +1,14 @@
+<34>Jan 15 10:30:45 webserver01 nginx: 192.168.1.50 - - [15/Jan/2024:10:30:45 +0000] "GET /api/users/12345 HTTP/1.1" 200 1234 "-" "Mozilla/5.0"
+<38>Jan 15 10:31:12 appserver01 app[12345]: WARNING: Database query slow - took 2.5s for SELECT * FROM orders
+<27>Jan 15 10:31:45 dbserver01 postgresql[5432]: ERROR: connection timeout - max connections reached (100/100)
+<30>Jan 15 10:32:01 appserver01 app[12345]: INFO: Cache service started successfully on port 6379
+<35>Jan 15 10:32:30 webserver01 nginx: 192.168.1.51 - - [15/Jan/2024:10:32:30 +0000] "POST /api/orders HTTP/1.1" 201 567 "-" "curl/7.68.0"
+<19>Jan 15 10:33:00 mailserver01 postfix[8901]: CRITICAL: Mail queue full - 10000 messages pending
+<34>Jan 15 10:33:15 appserver02 app[23456]: INFO: Order ORD-2024-002 processed successfully
+<38>Jan 15 10:33:45 firewall01 kernel: WARNING: Suspicious network activity from 192.168.1.100 - blocked 15 connection attempts
+<26>Jan 15 10:34:00 appserver01 app[12345]: FATAL: Out of memory - application shutting down
+<30>Jan 15 10:34:30 monitoring01 prometheus[7890]: INFO: Metrics exported: 1250 time series, 48 active targets
+<34>Jan 15 10:35:00 loadbalancer01 haproxy[4567]: INFO: Backend server appserver02 marked as UP
+<31>Jan 15 10:35:15 cacheserver01 redis[6379]: NOTICE: 1000 keys evicted due to maxmemory policy
+<34>Jan 15 10:35:30 appserver01 app[12345]: INFO: Batch job 'daily-report' started by scheduler
+<30>Jan 15 10:36:00 appserver01 app[12345]: INFO: Batch job completed - 15000 records processed
